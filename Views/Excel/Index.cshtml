@@ -1,55 +1,83 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <title>Excel Handler</title>
-</head>
-<body>
-    <h2>Excel Handler</h2>
+﻿    <style>
+        .spinner-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            transition: transform 1s linear;
+            animation: none;
+        }
+        spinner.rotate {
+            transform: rotate(360deg);
+        }
+    </style>
 
-    <form>
-        <div class="row row-mb-4">
-            <div class="col-md-2">
-                <label for="importFile" class="form-label">Upload Excel File</label>
-            </div>
-            <div class="col-md-4">
-                <input name="importFile" id="importFile" type="file" class="form-control" />
-            </div>
-            <div class="col-md-2">
-                <button id="btnUpload" class="btn btn-primary">Upload</button>
+        <div id="uploadContainer">
+            <div class="row row-mb-4">
+                <div class="col-md-2">
+                    <label for="importFile" class="form-label">Upload Excel File</label>
+                </div>
+                <div class="col-md-4">
+                    <input name="importFile" id="importFile" type="file" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <button id="uploadButton" class="btn btn-primary">Post</button>
+                </div>
             </div>
         </div>
-    </form>
-    
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script>
-        $(document).on("click", "#btnUpload", function () {
+        <div id="loadingSpinner" class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script>
+       $(document).ready(function () {
+        $("#uploadButton").on("click", function (event) {
+            event.preventDefault();
+   
+          
             var files = $("#importFile").get(0).files;
-
+            if (files.length === 0) {
+                alert("Please select an Excel file");
+              
+                return;
+            }
             var formData = new FormData();
             formData.append('importFile', files[0]);
 
             $.ajax({
-                url: '@Url.Action("SubmitOrder", "Excel")', // Update this URL to your server endpoint
-                data: formData,
+                url: '@Url.Action("SubmitOrder", "Excel")',
                 type: 'POST',
+                data: formData,
                 contentType: false,
                 processData: false,
                 success: function (response) {
                     if (response.result === 1) {
-                        alert('Data stored successfully!');
+                      // Hide spinner on success
+                        alert("Vouchers Posted Successfully");
                     } else {
-                        alert('Failed to store data!');
+                       // Hide spinner on failure
+                        alert(response.message);
                     }
-                    $('#importFile').val(''); // Reset the file input field
                 },
-                error: function () {
-                    alert('Failed to upload!');
+                error: function (xhr, status, error) {
+                    hideLoadingAnimation(); // Hide spinner on error
+                    alert("Error: " + error);
                 }
             });
         });
-        
+    });
+           
+ </script>
 
-    </script>
-</body>
-</html>
+   
